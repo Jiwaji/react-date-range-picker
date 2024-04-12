@@ -278,7 +278,7 @@
     color: #444;
 }
 
-.cdc-day span:hover:not(.date-disabled){
+.cdc-day span:hover:not(.disabled){
     cursor: pointer;
     background: #eee;
 } 
@@ -309,7 +309,6 @@
 .c-day-container.highlight-green .cdc-day span{
     background: #d4e2cb;
 }
-
-.date-disabled {
-    background-color: #f98d8d;
+.c-day-container.highlight-blue .cdc-day span{
+    background: #7cd6ff;
 }

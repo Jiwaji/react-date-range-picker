@@ -1,43 +1,41 @@
 import { useState, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import Calendar from './Calendar';
 
-import { setDateRange, setStartDate, setEndDate} from './calendarSlice';
 import './DateRangePicker.css';
 
 export default function DateRangePicker( { onChange }) {
     const [showDatePicker, setShowDatePicker] = useState(false)
 
-    const startDate = useSelector((state) => state.startDate)
-    const endDate = useSelector((state) => state.endDate)
     const dateRange = useSelector((state) => state.dateRange)
 
     const inputRef = useRef()
 
-    const dispatch = useDispatch()
+    const formatDate = (date) => {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
 
-    const handleDateSelect = (dateString, type) => {
-        if(type === "start") {
-            dispatch(setStartDate(dateString))
-        }
-        if(type === "end") {
-            dispatch(setEndDate(dateString))
-        }
+        if (month.length < 2)
+            month = '0' + month;
+        if (day.length < 2)
+            day = '0' + day;
 
-        const dateRangeString = `${startDate || "DD/MM/YYYY"} - ${endDate || "DD/MM/YYYY"}`
-        inputRef.current.value = dateRangeString
-        // setShowDatePicker(false)
+        return [year, month, day].join('-');
     }
 
     const handleSubmit = () => {
+        const [ startDate, endDate ] = dateRange.map((date) => {
+            return formatDate(date)
+        })
         const dateRangeString = `${startDate || "DD/MM/YYYY"} - ${endDate || "DD/MM/YYYY"}`
         inputRef.current.value = dateRangeString
         if(onChange) {
             onChange(dateRange)
         }
         setShowDatePicker(false)
-        dispatch(setDateRange([]))
     }
 
     return (
@@ -47,7 +45,7 @@ export default function DateRangePicker( { onChange }) {
             </div>
             {showDatePicker && (
                 <div>
-                    <Calendar onInput={(dateString, type) => handleDateSelect(dateString, type)} onSubmit={() => handleSubmit()}/>
+                    <Calendar onSubmit={() => handleSubmit()}/>
                 </div>
             )}
         </div>
