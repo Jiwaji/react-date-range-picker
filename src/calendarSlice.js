@@ -8,7 +8,8 @@ export const calendarSlice = createSlice({
         startDate: null,
         endDate: null,
         year: new Date().getFullYear(),
-        month: new Date().getMonth()
+        month: new Date().getMonth(),
+        dateRange: []
     },
     reducers: {
         setDate: (state, action) => {
@@ -23,26 +24,26 @@ export const calendarSlice = createSlice({
         setEndDate: (state, action) => {
             state.endDate = action.payload
         },
-        setYear: (state, action) => {
-            state.year += action.payload
+        setDateRange: (state, action) => {
+            state.dateRange = action.payload
         },
-        setMonth: (state, action) => {
-            let year = state.year;
-            let month = state.month + action.payload;
-            if (month === -1) {
-                month = 11;
-                year--;
-            } else if (month === 12) {
-                month = 0;
-                year++;
-            }
-            state.year = year
-            state.month = month
+        setDateRangeStart: (state, action) => {
+            state.dateRange[0] = action.payload
+        },
+        setDateRangeEnd: (state, action) => {
+            state.dateRange[1] = action.payload
         }
     },
 })
 
 // Action creators are generated for each case reducer function
-export const { setDate, setSelectedDay, setYear, setMonth, setStartDate, setEndDate } = calendarSlice.actions
+export const { setDate,
+    setSelectedDay,
+    setStartDate,
+    setEndDate,
+    setDateRange,
+    setDateRangeStart,
+    setDateRangeEnd
+} = calendarSlice.actions
 
 export default calendarSlice.reducer

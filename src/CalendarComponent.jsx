@@ -1,17 +1,58 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useSelector, useDispatch } from 'react-redux'
+import { useState, useEffect, useCallback, useReducer } from 'react';
+import { useDispatch } from 'react-redux'
 
-import { setYear, setMonth, setStartDate, setEndDate } from './calendarSlice';
+import { setStartDate, setEndDate, setDateRangeStart, setDateRangeEnd } from './calendarSlice';
 
 export default function CalendarComponent({ onChange, type }) {
 
     let oneDay = 60 * 60 * 24 * 1000;
     let todayTimestamp = Date.now() - (Date.now() % oneDay) + (new Date().getTimezoneOffset() * 1000 * 60);
 
-    const year = useSelector((state) => state.year)
-    const month = useSelector((state) => state.month)
     const [selectedDay, setSelectedDay] = useState(todayTimestamp)
     const [monthDetails, setMonthDetails] = useState([])
+
+    const now = new Date();
+    let nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    if (now.getMonth() === 11) {
+        nextMonth = new Date(now.getFullYear() + 1, 0, 1);
+    }
+
+    const initialState = {
+        year: new Date().getFullYear(),
+        month: new Date().getMonth()
+    }
+
+    if(type === "end") {
+        initialState.year = nextMonth.getFullYear();
+        initialState.month = nextMonth.getMonth();
+    }
+
+    const reducer = (state, action) => {
+        if(action.type === "set_year") {
+          const year = state.year + action.payload
+          return {
+              ...state,
+              year
+          }
+        }
+        if(action.type === "set_month") {
+            let year = state.year;
+            let month = state.month + action.payload;
+            if (month === -1) {
+                month = 11;
+                year--;
+            } else if (month === 12) {
+                month = 0;
+                year++;
+            }
+            return {
+                ...state,
+                year,
+                month
+            }
+        }
+   }
+    const [state, stateDispatch] = useReducer(reducer, initialState)
 
     const dispatch = useDispatch()
     
@@ -45,6 +86,7 @@ export default function CalendarComponent({ onChange, type }) {
     }
 
     const getMonthDetails = useCallback(() => {
+        const { year, month } = state
         let firstDay = (new Date(year, month)).getDay();
         let numberOfDays = getNumberOfDays(year, month);
         let monthArray = [];
@@ -67,7 +109,7 @@ export default function CalendarComponent({ onChange, type }) {
             }
         }
         setMonthDetails(monthArray)
-    }, [month, year, getDayDetails])
+    }, [state, getDayDetails])
 
     const isCurrentDay = day => {
         return day.timestamp === todayTimestamp;
@@ -86,15 +128,32 @@ export default function CalendarComponent({ onChange, type }) {
         return (date < 10 ? '0' + date : date) + '/' + (month < 10 ? '0' + month : month) + '/' + dateObject.getFullYear();
     }
 
+    function formatDate(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear();
+    
+        if (month.length < 2) 
+            month = '0' + month;
+        if (day.length < 2) 
+            day = '0' + day;
+    
+        return [year, month, day].join('-');
+    }
+
     const setDateToInput = (timestamp) => {
         let dateString = getDateStringFromTimestamp(timestamp);
+        const date = formatDate(timestamp)
         if(type === "start") {
             dispatch(setStartDate(dateString))
+            dispatch(setDateRangeStart(date))
         }
 
         if(type === "end") {
             dispatch(setEndDate(dateString))
-        }
+            dispatch(setDateRangeEnd(date))
+        }        
     }
 
     const onDateClick = day => {
@@ -106,32 +165,36 @@ export default function CalendarComponent({ onChange, type }) {
     }
 
     useEffect(() => {
+
+    }, [])
+
+    useEffect(() => {
         getMonthDetails()
-    }, [year, month, getMonthDetails])
+    }, [state, getMonthDetails])
 
     return (
         <>
             <div className='mdpc-head'>
                 <div className='mdpch-button'>
-                    <div className='mdpchb-inner' onClick={() => dispatch(setYear(-1))}>
+                    <div className='mdpchb-inner' onClick={() => stateDispatch({ type: "set_year", payload: -1})}>
                         <span className='mdpchbi-left-arrows'></span>
                     </div>
                 </div>
                 <div className='mdpch-button'>
-                    <div className='mdpchb-inner' onClick={() => dispatch(setMonth(-1))}>
+                    <div className='mdpchb-inner' onClick={() => stateDispatch({ type: "set_month", payload: -1})}>
                         <span className='mdpchbi-left-arrow'></span>
                     </div>
                 </div>
                 <div className='mdpch-container'>
-                    <div className='mdpchc-year'>{year}</div>
-                    <div className='mdpchc-month'>{getMonthStr(month)}</div>
+                    <div className='mdpchc-year'>{state.year}</div>
+                    <div className='mdpchc-month'>{getMonthStr(state.month)}</div>
                 </div>
                 <div className='mdpch-button'>
-                    <div className='mdpchb-inner' onClick={() => dispatch(setMonth(1))}>
+                    <div className='mdpchb-inner' onClick={() => stateDispatch({ type: "set_month", payload: 1})}>
                         <span className='mdpchbi-right-arrow'></span>
                     </div>
                 </div>
-                <div className='mdpch-button' onClick={() => dispatch(setYear(1))}>
+                <div className='mdpch-button' onClick={() => stateDispatch({ type: "set_year", payload: 1})}>
                     <div className='mdpchb-inner'>
                         <span className='mdpchbi-right-arrows'></span>
                     </div>
