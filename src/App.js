@@ -2,14 +2,14 @@ import './App.css';
 
 import DateRangePicker from './DateRangePicker';
 
-const handleChange = (dates) => {
-  console.log(dates)
+const handleChange = (dateRange, weekendsInRange) => {
+  console.log(dateRange, weekendsInRange)
 }
 
 function App() {
   return (
     <div className="App">
-      <DateRangePicker onChange={(dates) => handleChange(dates)}/>
+      <DateRangePicker onChange={handleChange}/>
     </div>
   );
 }

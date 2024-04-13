@@ -10,15 +10,11 @@ export default function Calendar({ onSubmit }) {
 
     const now = new Date();
 
-    const handleWeekRange = () => {
-        let prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-        if (now.getMonth() === 0) {
-            prevMonth = new Date(now.getFullYear() - 1, 11, now.getDate());
-        }
-        const dateRange = [prevMonth, now]
-        console.log(dateRange, now)
-        // dispatch(setDateRange(dateRange))
-        // console.log(now, prevMonth)
+    const handleDefinedRange = (offset) => {
+        var dateOffset = (24*60*60*1000) * offset;
+        const newDate = new Date(now.getTime() - dateOffset);
+        const dateRange = [newDate, now]
+        dispatch(setDateRange(dateRange))
     }
 
     return (
@@ -34,8 +30,8 @@ export default function Calendar({ onSubmit }) {
             </div>
             <div className='button-group'>
                 <div className='defined-ranges'>
-                    <button onClick={() => handleWeekRange()}>Last 7 days</button>
-                    <button>Last 30 days</button>
+                    <button onClick={() => handleDefinedRange(7)}>Last 7 days</button>
+                    <button onClick={() => handleDefinedRange(30)}>Last 30 days</button>
                 </div>
                 <button onClick={() => onSubmit()}>OK</button>
             </div>

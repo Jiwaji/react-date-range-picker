@@ -26,6 +26,18 @@ export default function DateRangePicker( { onChange }) {
         return [year, month, day].join('-');
     }
 
+    const getWeekendsInRange = () => {
+        const [ start, end ] = dateRange
+        const weekendsInRange = []
+        for(let dt=new Date(start); dt<=new Date(end); dt.setDate(dt.getDate()+1)){
+            if(dt.getDay() === 0 || dt.getDay() === 6) {
+                const formattedDate = formatDate(dt)
+                weekendsInRange.push(formattedDate);
+            }
+        }
+        return weekendsInRange;
+    }
+
     const handleSubmit = () => {
         const [ startDate, endDate ] = dateRange.map((date) => {
             return formatDate(date)
@@ -33,7 +45,7 @@ export default function DateRangePicker( { onChange }) {
         const dateRangeString = `${startDate || "DD/MM/YYYY"} - ${endDate || "DD/MM/YYYY"}`
         inputRef.current.value = dateRangeString
         if(onChange) {
-            onChange(dateRange)
+            onChange([startDate, endDate], getWeekendsInRange())
         }
         setShowDatePicker(false)
     }
